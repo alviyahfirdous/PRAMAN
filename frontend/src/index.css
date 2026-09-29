@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 215 25% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 17%;
+    --primary: 214 65% 33%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 30% 93%;
+    --secondary-foreground: 215 25% 27%;
+    --muted: 210 30% 94%;
+    --muted-foreground: 215 15% 50%;
+    --accent: 210 30% 93%;
+    --accent-foreground: 215 25% 17%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 214 65% 33%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-slate-ink tracking-tight;
+  }
+}
+
+@layer components {
+  /* PRAMAN clinical card */
+  .clinical-card {
+    @apply bg-white rounded-lg border border-slate-200 shadow-sm;
+  }
+
+  /* Status badges */
+  .badge-critical {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-maroon-50 text-maroon-700 border border-maroon-200;
+  }
+  .badge-high {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-terracotta-50 text-terracotta-700 border border-terracotta-200;
+  }
+  .badge-medium {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-ochre-50 text-ochre-700 border border-ochre-200;
+  }
+  .badge-low {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200;
+  }
+  .badge-info {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-clinical-50 text-clinical-700 border border-clinical-200;
+  }
+
+  /* KPI metric card */
+  .kpi-card {
+    @apply clinical-card p-5 flex flex-col gap-1;
+  }
+  .kpi-value {
+    @apply text-2xl font-bold text-navy-800 tabular-nums;
+  }
+  .kpi-label {
+    @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+  }
+
+  /* Audit trail entry */
+  .audit-entry {
+    @apply flex gap-3 py-2 border-b border-slate-100 last:border-0;
+  }
+
+  /* Sidebar nav item */
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-slate-600 
+           hover:bg-navy-50 hover:text-navy-700 transition-colors duration-150;
+  }
+  .nav-item-active {
+    @apply flex items-center gap-3 px-3 py-2 rounded-md text-sm font-semibold 
+           bg-navy-600 text-white shadow-sm;
+  }
+
+  /* Disclaimer banner */
+  .disclaimer-banner {
+    @apply bg-ochre-50 border border-ochre-200 rounded-md px-4 py-2 
+           text-xs text-ochre-800 flex items-center gap-2;
+  }
+
+  /* Human review required label */
+  .human-review-label {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold 
+           bg-terracotta-50 text-terracotta-700 border border-terracotta-200;
+  }
+
+  /* AI draft label */
+  .ai-draft-label {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold 
+           bg-clinical-50 text-clinical-700 border border-clinical-200;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    @apply h-2 rounded-full bg-slate-100 overflow-hidden;
+  }
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-500;
+  }
+
+  /* Deadline countdown */
+  .countdown-critical {
+    @apply text-maroon-600 font-bold tabular-nums;
+  }
+  .countdown-warning {
+    @apply text-terracotta-600 font-semibold tabular-nums;
+  }
+  .countdown-ok {
+    @apply text-teal-600 font-medium tabular-nums;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
