@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import {
   Activity, AlertTriangle, Shield, CheckCircle2, Clock,
   TrendingUp, TrendingDown, AlertCircle, ArrowRight,
@@ -65,17 +66,24 @@ function RiskBadge({ level }: { level: RiskLevel }) {
   return <span className={getRiskBadgeClass(level)}>{level.replace('_', ' ')}</span>;
 }
 
-function StudyHealthCard({ card }: {
-  card: LeadershipDashboard['study_cards'][number]
+function StudyHealthCard({ card, onClick }: {
+  card: LeadershipDashboard['study_cards'][number];
+  onClick?: () => void;
 }) {
   const pct = getEnrolmentPct(card.enrolled, card.target);
   const isAtRisk = card.risk_level === 'HIGH' || card.risk_level === 'CRITICAL';
 
   return (
-    <div className={cn(
-      "clinical-card p-4 hover:shadow-md transition-all duration-200 cursor-pointer",
-      isAtRisk && "border-l-4 border-l-terracotta-500"
-    )}>
+    <div
+      className={cn(
+        "clinical-card p-4 hover:shadow-md transition-all duration-200 cursor-pointer",
+        isAtRisk && "border-l-4 border-l-terracotta-500"
+      )}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
+    >
       <div className="flex items-start justify-between mb-3">
         <div>
           <div className="font-semibold text-sm text-navy-900 leading-tight">{card.title}</div>
@@ -138,8 +146,9 @@ function StudyHealthCard({ card }: {
   );
 }
 
-function CriticalActionItem({ action }: {
-  action: LeadershipDashboard['critical_actions'][number]
+function CriticalActionItem({ action, onAction }: {
+  action: LeadershipDashboard['critical_actions'][number];
+  onAction?: () => void;
 }) {
   const isCritical = action.severity === 'CRITICAL';
   return (
@@ -184,7 +193,11 @@ function CriticalActionItem({ action }: {
           }
         </div>
       </div>
-      <button className="flex-shrink-0 p-1.5 rounded-md hover:bg-white/70 text-slate-500 transition-colors">
+      <button
+        className="flex-shrink-0 p-1.5 rounded-md hover:bg-white/70 text-slate-500 transition-colors"
+        onClick={onAction}
+        title="View action"
+      >
         <ArrowRight size={14} />
       </button>
     </div>
@@ -192,6 +205,7 @@ function CriticalActionItem({ action }: {
 }
 
 export default function LeadershipDashboard() {
+  const navigate = useNavigate();
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard', 'leadership'],
     queryFn: () => dashboardApi.leadership().then((r) => r.data as LeadershipDashboard),
@@ -261,13 +275,20 @@ export default function LeadershipDashboard() {
         <div className="xl:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-navy-900">Portfolio Health Map</h2>
-            <button className="text-xs text-clinical-600 hover:text-clinical-800 font-medium flex items-center gap-1">
+            <button
+              className="text-xs text-clinical-600 hover:text-clinical-800 font-medium flex items-center gap-1"
+              onClick={() => navigate('/studies')}
+            >
               View all <ArrowRight size={12} />
             </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {(data?.study_cards ?? FALLBACK_STUDY_CARDS).map((card) => (
-              <StudyHealthCard key={card.id} card={card} />
+              <StudyHealthCard
+                key={card.id}
+                card={card}
+                onClick={() => navigate(`/studies/${card.id}`)}
+              />
             ))}
           </div>
         </div>
@@ -282,7 +303,16 @@ export default function LeadershipDashboard() {
           </div>
           <div className="space-y-2">
             {(data?.critical_actions ?? FALLBACK_ACTIONS).map((action, i) => (
-              <CriticalActionItem key={i} action={action} />
+              <CriticalActionItem
+                key={i}
+                action={action}
+                onAction={() => {
+                  if (action.type === 'SAE_PENDING_REVIEW') navigate('/safety');
+                  else if (action.type === 'IEC_RENEWAL' || action.type === 'CTRI_UPDATE') navigate('/ethics');
+                  else if (action.type === 'MONITORING_OVERDUE') navigate('/monitoring');
+                  else navigate('/studies');
+                }}
+              />
             ))}
           </div>
         </div>

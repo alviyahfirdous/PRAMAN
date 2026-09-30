@@ -12,6 +12,7 @@ import { authApi } from '@/api/client';
 import { useAuthStore } from '@/lib/authStore';
 import { getRoleDashboardPath } from '@/lib/utils';
 import type { TokenResponse } from '@/types';
+import Modal from '@/components/Modal';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Email or username is required'),
@@ -46,6 +47,10 @@ export default function LoginPage() {
   const [serverError, setServerError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
+  const [forgotModal, setForgotModal] = useState(false);
+  const [msModal, setMsModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -276,7 +281,11 @@ export default function LoginPage() {
                   />
                   <span className="text-sm text-slate-600">Remember me</span>
                 </label>
-                <button type="button" className="text-sm text-clinical-600 hover:text-clinical-800 font-medium transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setForgotModal(true)}
+                  className="text-sm text-clinical-600 hover:text-clinical-800 font-medium transition-colors"
+                >
                   Forgot password?
                 </button>
               </div>
@@ -320,6 +329,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 id="microsoft-signin-btn"
+                onClick={() => setMsModal(true)}
                 className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-lg text-sm font-medium
                   text-slate-700 border border-slate-300 bg-white hover:bg-slate-50 active:bg-slate-100
                   transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-navy-400 focus:ring-offset-2"
@@ -384,6 +394,89 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+      {/* ─── Forgot Password Modal ─── */}
+      <Modal
+        open={forgotModal}
+        onClose={() => { setForgotModal(false); setForgotSent(false); setForgotEmail(''); }}
+        title="Reset Password"
+        size="sm"
+        footer={
+          forgotSent ? (
+            <button
+              onClick={() => { setForgotModal(false); setForgotSent(false); setForgotEmail(''); }}
+              className="px-4 py-2 text-sm font-semibold text-white rounded-lg"
+              style={{ background: 'linear-gradient(135deg, #1e4e8c 0%, #0d82c8 100%)' }}
+            >
+              Done
+            </button>
+          ) : (
+            <>
+              <button onClick={() => setForgotModal(false)} className="px-4 py-2 text-sm text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50">Cancel</button>
+              <button
+                onClick={() => { if (forgotEmail) setForgotSent(true); }}
+                disabled={!forgotEmail}
+                className="px-4 py-2 text-sm font-semibold text-white rounded-lg disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, #1e4e8c 0%, #0d82c8 100%)' }}
+              >
+                Send Reset Link
+              </button>
+            </>
+          )
+        }
+      >
+        {forgotSent ? (
+          <div className="text-center py-4">
+            <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <CheckCircle2 size={24} className="text-teal-600" />
+            </div>
+            <div className="text-sm font-semibold text-navy-800 mb-1">Reset link sent!</div>
+            <p className="text-sm text-slate-500">If an account exists for <strong>{forgotEmail}</strong>, a password reset link has been sent. Check your inbox.</p>
+            <p className="text-xs text-slate-400 mt-2">(Demo — no email was actually sent)</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">Enter your registered email address and we'll send you a password reset link.</p>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email address</label>
+              <input
+                type="email"
+                value={forgotEmail}
+                onChange={e => setForgotEmail(e.target.value)}
+                placeholder="you@praman.demo"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy-400"
+              />
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* ─── Microsoft SSO Modal ─── */}
+      <Modal
+        open={msModal}
+        onClose={() => setMsModal(false)}
+        title="Microsoft Single Sign-On"
+        size="sm"
+        footer={
+          <button onClick={() => setMsModal(false)} className="px-4 py-2 text-sm font-semibold text-white bg-navy-600 rounded-lg hover:bg-navy-700">Got it</button>
+        }
+      >
+        <div className="text-center py-4">
+          <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <svg width="24" height="24" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" y="0" width="10" height="10" fill="#F25022" />
+              <rect x="11" y="0" width="10" height="10" fill="#7FBA00" />
+              <rect x="0" y="11" width="10" height="10" fill="#00A4EF" />
+              <rect x="11" y="11" width="10" height="10" fill="#FFB900" />
+            </svg>
+          </div>
+          <div className="text-sm font-semibold text-navy-800 mb-2">Microsoft SSO — Coming Soon</div>
+          <p className="text-sm text-slate-500">Microsoft Entra ID (Azure AD) single sign-on is being configured for your organisation. Please use your PRAMAN credentials or a demo account for now.</p>
+          <p className="text-xs text-slate-400 mt-3">Contact your system administrator for SSO setup.</p>
+        </div>
+      </Modal>
     </div>
   );
 }
+
+// ─── Modals (rendered outside the main JSX tree as siblings in the component return) ───
+// They are included below by wrapping the entire return in a fragment

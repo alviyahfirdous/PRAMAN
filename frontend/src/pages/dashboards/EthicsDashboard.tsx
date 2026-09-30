@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, Clock, CheckCircle2, XCircle, HelpCircle, Shield } from 'lucide-react';
 import { dashboardApi } from '@/api/client';
 import { formatDate } from '@/lib/utils';
+import Modal from '@/components/Modal';
 
 const DECISION_CONFIG = {
   PENDING: { label: 'Pending', className: 'badge-medium', icon: Clock },
@@ -12,11 +13,41 @@ const DECISION_CONFIG = {
   REJECTED: { label: 'Rejected', className: 'badge-critical', icon: XCircle },
 };
 
+type ActionType = 'approve' | 'clarify' | 'hold' | null;
+
 export default function EthicsDashboard() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['dashboard', 'ethics'],
     queryFn: () => dashboardApi.ethics().then((r) => r.data),
   });
+
+  const [modal, setModal] = useState<ActionType>(null);
+  const [selectedItem, setSelectedItem] = useState<Record<string, unknown> | null>(null);
+  const [comments, setComments] = useState('');
+  const [localDecisions, setLocalDecisions] = useState<Record<string, string>>({});
+  const [toast, setToast] = useState('');
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 3500);
+  };
+
+  const handleAction = (action: ActionType, item: Record<string, unknown>) => {
+    setSelectedItem(item);
+    setComments('');
+    setModal(action);
+  };
+
+  const handleSubmitDecision = (action: ActionType) => {
+    if (!selectedItem) return;
+    const id = selectedItem.id as string;
+    const newDecision = action === 'approve' ? 'APPROVED' : action === 'clarify' ? 'CLARIFICATION_REQUESTED' : 'HELD';
+    setLocalDecisions(prev => ({ ...prev, [id]: newDecision }));
+    setModal(null);
+    setSelectedItem(null);
+    const msgs = { approve: '✓ Submission approved successfully (demo)', clarify: '✓ Clarification requested (demo)', hold: '✓ Submission held pending committee review (demo)' };
+    showToast(msgs[action!] || 'Action recorded');
+  };
 
   if (isLoading) return (
     <div className="flex items-center justify-center h-64">
@@ -24,11 +55,26 @@ export default function EthicsDashboard() {
     </div>
   );
 
-  const summary = data?.summary ?? {};
-  const queue = data?.review_queue ?? FALLBACK_QUEUE;
+  const summary = data?.summary ?? {
+    total_submissions: 12,
+    pending_review: 3,
+    approved: 8,
+    clarification_requested: 1,
+  };
+  const queue = (data?.review_queue ?? FALLBACK_QUEUE).map((r: Record<string, unknown>) => ({
+    ...r,
+    decision: localDecisions[r.id as string] ?? r.decision,
+  }));
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 bg-teal-700 text-white px-5 py-3 rounded-xl shadow-xl text-sm font-medium animate-fade-in">
+          {toast}
+        </div>
+      )}
+
       <div>
         <h1 className="text-2xl font-bold text-navy-900">Ethics Committee Workspace</h1>
         <p className="text-slate-500 text-sm mt-0.5">Protocol submissions, consents, renewals, and safety reports</p>
@@ -96,13 +142,25 @@ export default function EthicsDashboard() {
                     <td className="py-3 px-3">
                       {r.decision === 'PENDING' && (
                         <div className="flex gap-1">
-                          <button id={`approve-${i}`} className="px-2 py-1 text-xs font-semibold text-white bg-teal-600 rounded hover:bg-teal-700 transition-colors">
+                          <button
+                            id={`approve-${i}`}
+                            className="px-2 py-1 text-xs font-semibold text-white bg-teal-600 rounded hover:bg-teal-700 transition-colors"
+                            onClick={() => handleAction('approve', r)}
+                          >
                             Approve
                           </button>
-                          <button id={`clarify-${i}`} className="px-2 py-1 text-xs font-medium text-slate-600 border border-slate-300 rounded hover:bg-slate-50 transition-colors">
+                          <button
+                            id={`clarify-${i}`}
+                            className="px-2 py-1 text-xs font-medium text-slate-600 border border-slate-300 rounded hover:bg-slate-50 transition-colors"
+                            onClick={() => handleAction('clarify', r)}
+                          >
                             Clarify
                           </button>
-                          <button id={`hold-${i}`} className="px-2 py-1 text-xs font-medium text-terracotta-600 border border-terracotta-200 rounded hover:bg-terracotta-50 transition-colors">
+                          <button
+                            id={`hold-${i}`}
+                            className="px-2 py-1 text-xs font-medium text-terracotta-600 border border-terracotta-200 rounded hover:bg-terracotta-50 transition-colors"
+                            onClick={() => handleAction('hold', r)}
+                          >
                             Hold
                           </button>
                         </div>
@@ -115,6 +173,115 @@ export default function EthicsDashboard() {
           </table>
         </div>
       </div>
+
+      {/* Approve Modal */}
+      <Modal
+        open={modal === 'approve'}
+        onClose={() => setModal(null)}
+        title="Approve Submission"
+        footer={
+          <>
+            <button onClick={() => setModal(null)} className="px-4 py-2 text-sm text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50">Cancel</button>
+            <button onClick={() => handleSubmitDecision('approve')} className="px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700">Approve</button>
+          </>
+        }
+      >
+        {selectedItem && (
+          <div className="space-y-4">
+            <div className="bg-slate-50 rounded-xl p-3 text-sm">
+              <div className="font-semibold text-navy-800">{selectedItem.study_title as string}</div>
+              <div className="text-xs text-slate-500 font-mono mt-0.5">{selectedItem.protocol_id as string}</div>
+              <div className="text-xs text-slate-600 mt-1">Type: {(selectedItem.submission_type as string).replace(/_/g, ' ')} | Version: {selectedItem.protocol_version as string}</div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Committee Comments (required for record)</label>
+              <textarea
+                rows={3}
+                value={comments}
+                onChange={e => setComments(e.target.value)}
+                placeholder="Enter approval rationale or any conditions…"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="approve-confirm" className="rounded" />
+              <label htmlFor="approve-confirm" className="text-sm text-slate-700">I confirm this approval after full committee review of all submitted documents.</label>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Clarify Modal */}
+      <Modal
+        open={modal === 'clarify'}
+        onClose={() => setModal(null)}
+        title="Request Clarification"
+        footer={
+          <>
+            <button onClick={() => setModal(null)} className="px-4 py-2 text-sm text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50">Cancel</button>
+            <button onClick={() => handleSubmitDecision('clarify')} className="px-4 py-2 text-sm font-semibold text-white bg-navy-600 rounded-lg hover:bg-navy-700">Send Request</button>
+          </>
+        }
+      >
+        {selectedItem && (
+          <div className="space-y-4">
+            <div className="bg-slate-50 rounded-xl p-3 text-sm">
+              <div className="font-semibold text-navy-800">{selectedItem.study_title as string}</div>
+              <div className="text-xs text-slate-600 mt-0.5">Submission: {(selectedItem.submission_type as string).replace(/_/g, ' ')}</div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Clarification Required</label>
+              <textarea
+                rows={4}
+                value={comments}
+                onChange={e => setComments(e.target.value)}
+                placeholder="Describe what clarification is needed from the sponsor/PI…"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Response Deadline</label>
+              <input type="date" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy-400"
+                defaultValue={new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]} />
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Hold Modal */}
+      <Modal
+        open={modal === 'hold'}
+        onClose={() => setModal(null)}
+        title="Hold Submission"
+        footer={
+          <>
+            <button onClick={() => setModal(null)} className="px-4 py-2 text-sm text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50">Cancel</button>
+            <button onClick={() => handleSubmitDecision('hold')} className="px-4 py-2 text-sm font-semibold text-white bg-terracotta-600 rounded-lg hover:bg-terracotta-700">Place on Hold</button>
+          </>
+        }
+      >
+        {selectedItem && (
+          <div className="space-y-4">
+            <div className="bg-terracotta-50 border border-terracotta-200 rounded-lg px-3 py-2 text-sm text-terracotta-800">
+              Placing this submission on hold will pause its review and notify the PI and Sponsor.
+            </div>
+            <div className="bg-slate-50 rounded-xl p-3 text-sm">
+              <div className="font-semibold text-navy-800">{selectedItem.study_title as string}</div>
+              <div className="text-xs text-slate-600 mt-0.5">Submission: {(selectedItem.submission_type as string).replace(/_/g, ' ')}</div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Reason for Hold</label>
+              <textarea
+                rows={3}
+                value={comments}
+                onChange={e => setComments(e.target.value)}
+                placeholder="Reason for placing this submission on hold…"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta-400"
+              />
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

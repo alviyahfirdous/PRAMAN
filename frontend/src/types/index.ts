@@ -164,3 +164,133 @@ export interface LeadershipDashboard {
   }>;
   notifications: Notification[];
 }
+
+export interface PIDashboardData {
+  assigned_studies: Array<{
+    id: string;
+    protocol_id: string;
+    title: string;
+    status: string;
+    risk_level: string;
+    actual_enrolment: number;
+    target_enrolment: number;
+    compliance_score?: number;
+  }>;
+  pending_approvals: {
+    sae_reviews?: number;
+    protocol_deviations?: number;
+    iec_renewals?: number;
+    consent_amendments?: number;
+    capa_approvals?: number;
+  };
+  approval_queue: Array<{
+    type: string;
+    case_id?: string;
+    description: string;
+    status: string;
+    created_at: string;
+    hours_remaining?: number | null;
+    requires_signature?: boolean;
+    [key: string]: unknown;
+  }>;
+}
+
+export interface CoordinatorDashboardData {
+  summary: {
+    total_participants?: number;
+    today_visits?: number;
+    re_consent_pending?: number;
+    open_queries?: number;
+    open_ae_drafts?: number;
+  };
+  participants: Array<{
+    id: string;
+    pseudonymised_subject_id: string;
+    status: string;
+    consent_status: string;
+    enrollment_date?: string | null;
+    re_consent_required?: boolean;
+    [key: string]: unknown;
+  }>;
+  re_consent_pending: Array<{
+    id: string;
+    pseudonymised_subject_id: string;
+    re_consent_reason: string;
+    re_consent_deadline: string;
+    [key: string]: unknown;
+  }>;
+  ae_drafts: Array<{
+    case_id: string;
+    event_term: string;
+    created_at: string;
+    [key: string]: unknown;
+  }>;
+}
+
+export interface EthicsDashboardData {
+  summary: {
+    total_submissions?: number;
+    pending_review?: number;
+    approved?: number;
+    clarification_requested?: number;
+  };
+  review_queue: Array<{
+    id: string;
+    protocol_id: string;
+    study_title: string;
+    submission_type: string;
+    protocol_version: string;
+    submission_date: string;
+    due_date: string;
+    decision: string;
+    [key: string]: unknown;
+  }>;
+}
+
+export interface PVDashboardData {
+  disclaimer: string;
+  kpis: {
+    total_cases?: number;
+    draft_cases?: number;
+    triage_queue?: number;
+    medical_review_pending?: number;
+    urgent_cases?: number;
+    potential_signals?: number;
+  };
+  cases: Array<{
+    case_id: string;
+    event_category: string;
+    event_term: string;
+    seriousness: string;
+    status: string;
+    hours_remaining?: number;
+    causality: string;
+    severity: string;
+    [key: string]: unknown;
+  }>;
+  signals: Array<{
+    id: string;
+    event_term: string;
+    description: string;
+    event_count: number;
+    site_count: number;
+    status: string;
+    disclaimer: string;
+    [key: string]: unknown;
+  }>;
+}
+
+export interface MonitorDashboardData {
+  monitoring_visits: Array<{
+    id: string;
+    visit_id: string;
+    visit_type: string;
+    planned_date: string;
+    actual_date?: string | null;
+    status: string;
+    open_findings_count: number;
+    sdv_percentage?: number | null;
+    [key: string]: unknown;
+  }>;
+}
+

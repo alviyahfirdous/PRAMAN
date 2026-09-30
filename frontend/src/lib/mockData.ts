@@ -6,7 +6,17 @@
  * All data is synthetic — not submission-ready.
  */
 
-import type { LeadershipDashboard, User, TokenResponse } from '@/types';
+import type {
+  LeadershipDashboard,
+  PIDashboardData,
+  CoordinatorDashboardData,
+  EthicsDashboardData,
+  PVDashboardData,
+  MonitorDashboardData,
+  Study,
+  User,
+  TokenResponse,
+} from '@/types';
 
 // ─── DEMO USERS ────────────────────────────────────────────
 export const DEMO_USERS: Record<string, { user: User; password: string }> = {
@@ -118,7 +128,7 @@ export const MOCK_LEADERSHIP_DASHBOARD: LeadershipDashboard = {
   ],
 };
 
-export const MOCK_PI_DASHBOARD = {
+export const MOCK_PI_DASHBOARD: PIDashboardData = {
   assigned_studies: [
     { id: 's1', protocol_id: 'AIIA-OA-2026-001', title: 'AyurVeda OA-2026', status: 'ACTIVE', risk_level: 'HIGH', actual_enrolment: 82, target_enrolment: 150, compliance_score: 71 },
     { id: 's3', protocol_id: 'AIIA-GI-2026-003', title: 'AgniBalance', status: 'ACTIVE', risk_level: 'HIGH', actual_enrolment: 43, target_enrolment: 120, compliance_score: 76 },
@@ -131,7 +141,7 @@ export const MOCK_PI_DASHBOARD = {
   ],
 };
 
-export const MOCK_COORDINATOR_DASHBOARD = {
+export const MOCK_COORDINATOR_DASHBOARD: CoordinatorDashboardData = {
   summary: { total_participants: 45, today_visits: 3, re_consent_pending: 8, open_queries: 7, open_ae_drafts: 1 },
   participants: Array.from({ length: 20 }, (_, i) => ({
     id: `p-${i}`,
@@ -156,7 +166,7 @@ export const MOCK_COORDINATOR_DASHBOARD = {
   ],
 };
 
-export const MOCK_ETHICS_DASHBOARD = {
+export const MOCK_ETHICS_DASHBOARD: EthicsDashboardData = {
   summary: { total_submissions: 12, pending_review: 3, approved: 8, clarification_requested: 1 },
   review_queue: [
     { id: 'e1', protocol_id: 'AIIA-OA-2026-001', study_title: 'AyurVeda OA-2026', submission_type: 'CONTINUING_REVIEW', protocol_version: 'v2.0', submission_date: d(-5), due_date: d(12), decision: 'PENDING' },
@@ -167,7 +177,7 @@ export const MOCK_ETHICS_DASHBOARD = {
   ],
 };
 
-export const MOCK_PV_DASHBOARD = {
+export const MOCK_PV_DASHBOARD: PVDashboardData = {
   disclaimer: 'MedDRA/WHO Drug coding-ready fields. Terminology licensing required before production use.',
   kpis: { total_cases: 5, draft_cases: 1, triage_queue: 4, medical_review_pending: 1, urgent_cases: 2, potential_signals: 1 },
   cases: [
@@ -188,7 +198,7 @@ export const MOCK_PV_DASHBOARD = {
   }],
 };
 
-export const MOCK_MONITOR_DASHBOARD = {
+export const MOCK_MONITOR_DASHBOARD: MonitorDashboardData = {
   monitoring_visits: [
     { id: 'mv1', visit_id: 'MON-DEL01-001', visit_type: 'ROUTINE', planned_date: d(-30), actual_date: d(-28), status: 'COMPLETED', open_findings_count: 1, sdv_percentage: 87.5 },
     { id: 'mv2', visit_id: 'MON-DEL02-001', visit_type: 'ROUTINE', planned_date: d(-9), actual_date: null, status: 'OVERDUE', open_findings_count: 0, sdv_percentage: null },
@@ -196,7 +206,7 @@ export const MOCK_MONITOR_DASHBOARD = {
   ],
 };
 
-export const MOCK_STUDIES = [
+export const MOCK_STUDIES: Study[] = [
   { id: 's1', protocol_id: 'AIIA-OA-2026-001', title: 'Efficacy and Safety of Ayurvedic Formulation in Osteoarthritis', short_title: 'AyurVeda OA-2026', phase: 'PHASE_3', status: 'ACTIVE', risk_level: 'HIGH', target_enrolment: 150, actual_enrolment: 82, screen_failure_count: 18, therapeutic_area: 'Musculoskeletal', intervention: 'Vatari Guggulu 500mg TID', iec_renewal_due: d(12), ctri_update_due: d(5), compliance_score: 71, data_quality_score: 78, overall_risk_score: 78, ctri_number: 'CTRI/2026/01/000001' },
   { id: 's2', protocol_id: 'AIIA-DM-2025-002', title: 'PramehaCare: Integrated Ayurvedic Management of Type 2 Diabetes', short_title: 'PramehaCare', phase: 'PHASE_3', status: 'ACTIVE', risk_level: 'LOW', target_enrolment: 500, actual_enrolment: 410, screen_failure_count: 45, therapeutic_area: 'Endocrinology / Diabetes', intervention: 'Nishamalaki Tablet + Lifestyle Module', iec_renewal_due: d(90), ctri_update_due: d(60), compliance_score: 94, data_quality_score: 92, overall_risk_score: 22, ctri_number: 'CTRI/2025/06/000042' },
   { id: 's3', protocol_id: 'AIIA-GI-2026-003', title: 'AgniBalance: Ayurvedic Formulation for Functional Gastrointestinal Disorders', short_title: 'AgniBalance', phase: 'PHASE_2', status: 'ACTIVE', risk_level: 'HIGH', target_enrolment: 120, actual_enrolment: 43, screen_failure_count: 12, therapeutic_area: 'Gastroenterology', intervention: 'Chitrakadi Vati 250mg BID', iec_renewal_due: d(45), ctri_update_due: d(20), compliance_score: 76, data_quality_score: 81, overall_risk_score: 71, ctri_number: 'CTRI/2026/03/000089' },

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, Clock, AlertTriangle, Activity, Zap, Eye } from 'lucide-react';
 import { dashboardApi } from '@/api/client';
 import { formatDateTime } from '@/lib/utils';
+import Modal from '@/components/Modal';
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   DRAFT: { label: 'Draft', className: 'badge-info' },
@@ -21,18 +22,53 @@ export default function PVDashboard() {
     refetchInterval: 30000,
   });
 
+  const [caseModal, setCaseModal] = useState<Record<string, unknown> | null>(null);
+  const [signalModal, setSignalModal] = useState<Record<string, unknown> | null>(null);
+  const [notes, setNotes] = useState('');
+  const [localStatuses, setLocalStatuses] = useState<Record<string, string>>({});
+  const [toast, setToast] = useState('');
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 3500);
+  };
+
   if (isLoading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-8 h-8 border-2 border-navy-200 border-t-navy-600 rounded-full animate-spin" />
     </div>
   );
 
-  const kpis = data?.kpis ?? {};
-  const cases = data?.cases ?? FALLBACK_CASES;
+  const kpis = data?.kpis ?? {
+    total_cases: 5,
+    draft_cases: 1,
+    triage_queue: 4,
+    medical_review_pending: 1,
+    urgent_cases: 2,
+    potential_signals: 1,
+  };
+  const cases = (data?.cases ?? FALLBACK_CASES).map((c: Record<string, unknown>) => ({
+    ...c,
+    status: localStatuses[c.case_id as string] ?? c.status,
+  }));
   const signals = data?.signals ?? FALLBACK_SIGNALS;
+
+  const handleTriageCase = (caseItem: Record<string, unknown>, newStatus: string) => {
+    setLocalStatuses(prev => ({ ...prev, [caseItem.case_id as string]: newStatus }));
+    setCaseModal(null);
+    setNotes('');
+    showToast(`✓ ${caseItem.case_id} moved to ${newStatus.replace(/_/g, ' ')} (demo — no data was saved)`);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 bg-teal-700 text-white px-5 py-3 rounded-xl shadow-xl text-sm font-medium animate-fade-in">
+          {toast}
+        </div>
+      )}
+
       <div>
         <h1 className="text-2xl font-bold text-navy-900">Pharmacovigilance Command Centre</h1>
         <p className="text-slate-500 text-sm mt-0.5">Safety case management, deadline tracking, signal review</p>
@@ -91,7 +127,10 @@ export default function PVDashboard() {
                   </div>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
-                  <button className="px-3 py-1.5 text-xs font-semibold text-white bg-clinical-600 rounded-lg hover:bg-clinical-700 transition-colors">
+                  <button
+                    className="px-3 py-1.5 text-xs font-semibold text-white bg-clinical-600 rounded-lg hover:bg-clinical-700 transition-colors"
+                    onClick={() => { setSignalModal(signal); setNotes(''); }}
+                  >
                     Review Signal
                   </button>
                 </div>
@@ -157,7 +196,10 @@ export default function PVDashboard() {
                       </span>
                     </td>
                     <td className="py-3 px-3">
-                      <button className="px-3 py-1 text-xs font-semibold text-white bg-navy-600 rounded hover:bg-navy-700 transition-colors">
+                      <button
+                        className="px-3 py-1 text-xs font-semibold text-white bg-navy-600 rounded hover:bg-navy-700 transition-colors"
+                        onClick={() => { setCaseModal(c); setNotes(''); }}
+                      >
                         Review
                       </button>
                     </td>
@@ -168,6 +210,109 @@ export default function PVDashboard() {
           </table>
         </div>
       </div>
+
+      {/* Case Review Modal */}
+      <Modal
+        open={!!caseModal}
+        onClose={() => setCaseModal(null)}
+        title={`Review Case: ${caseModal?.case_id ?? ''}`}
+        size="lg"
+        footer={
+          <>
+            <button onClick={() => setCaseModal(null)} className="px-4 py-2 text-sm text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50">Close</button>
+            <button
+              onClick={() => caseModal && handleTriageCase(caseModal, 'FOLLOW_UP_REQUIRED')}
+              className="px-4 py-2 text-sm font-medium text-ochre-700 border border-ochre-300 rounded-lg hover:bg-ochre-50 transition-colors"
+            >
+              Request Follow-up
+            </button>
+            <button
+              onClick={() => caseModal && handleTriageCase(caseModal, 'REGULATORY_REVIEW')}
+              className="px-4 py-2 text-sm font-semibold text-white bg-navy-600 rounded-lg hover:bg-navy-700 transition-colors"
+            >
+              Forward to Regulatory
+            </button>
+          </>
+        }
+      >
+        {caseModal && (
+          <div className="space-y-4">
+            <div className="bg-maroon-50 border border-maroon-200 rounded-lg px-4 py-3 text-sm text-maroon-800">
+              <strong>Human review required.</strong> This platform provides decision support only. All causality assessments, seriousness classifications, and case closures must be performed by a qualified pharmacovigilance professional.
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: 'Case ID', value: caseModal.case_id as string },
+                { label: 'Category', value: (caseModal.event_category as string).replace(/_/g, ' ') },
+                { label: 'Event Term', value: caseModal.event_term as string },
+                { label: 'Seriousness', value: caseModal.seriousness ? (caseModal.seriousness as string).replace(/_/g, ' ') : 'Pending assessment' },
+                { label: 'Current Status', value: (STATUS_CONFIG[caseModal.status as string] ?? STATUS_CONFIG.DRAFT).label },
+                { label: 'Deadline', value: caseModal.hours_remaining !== null ? `${caseModal.hours_remaining}h remaining` : '—' },
+              ].map(({ label, value }) => (
+                <div key={label} className="bg-slate-50 rounded-lg px-3 py-2">
+                  <div className="text-xs text-slate-500">{label}</div>
+                  <div className="text-sm font-semibold text-navy-800 mt-0.5">{value}</div>
+                </div>
+              ))}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Reviewer Notes</label>
+              <textarea
+                rows={3}
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder="Add your review notes (causality assessment, action taken)…"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy-400"
+              />
+            </div>
+            <p className="text-xs text-slate-400">All actions are timestamped and added to the tamper-evident audit trail.</p>
+          </div>
+        )}
+      </Modal>
+
+      {/* Signal Review Modal */}
+      <Modal
+        open={!!signalModal}
+        onClose={() => setSignalModal(null)}
+        title="Safety Signal Review"
+        size="lg"
+        footer={
+          <>
+            <button onClick={() => setSignalModal(null)} className="px-4 py-2 text-sm text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50">Close</button>
+            <button
+              onClick={() => { setSignalModal(null); showToast('✓ Signal acknowledged and escalated to committee (demo)'); }}
+              className="px-4 py-2 text-sm font-semibold text-white bg-clinical-600 rounded-lg hover:bg-clinical-700"
+            >
+              Escalate to Committee
+            </button>
+          </>
+        }
+      >
+        {signalModal && (
+          <div className="space-y-4">
+            <div className="bg-clinical-50 border border-clinical-200 rounded-lg px-4 py-3">
+              <div className="text-xs font-semibold text-clinical-700 mb-1">Potential Safety Signal</div>
+              <div className="text-sm font-semibold text-navy-800">{signalModal.event_term as string}</div>
+              <div className="text-xs text-slate-500 mt-0.5">{signalModal.event_count as number} events across {signalModal.site_count as number} sites</div>
+            </div>
+            <p className="text-sm text-slate-700">{signalModal.description as string}</p>
+            <div className="bg-white rounded-xl border border-clinical-200 px-4 py-3">
+              <p className="text-xs text-clinical-700 font-medium italic">{signalModal.disclaimer as string}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">PV Expert Assessment</label>
+              <textarea
+                rows={4}
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder="Document your expert assessment of this potential signal…"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy-400"
+              />
+            </div>
+            <p className="text-xs text-slate-400">This signal review and your assessment will be added to the audit trail.</p>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
