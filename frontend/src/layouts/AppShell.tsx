@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BookOpen, Building2, Users, ClipboardList,
-  Shield, FileCheck, Eye, Database, Settings,
+  Shield, FileCheck, Eye, Database, Settings, Sparkles,
   Bell, Search, LogOut, ChevronDown, AlertCircle, Menu, X
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/authStore';
@@ -20,14 +20,15 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Command Centre', path: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR', 'PHARMACOVIGILANCE_OFFICER', 'ETHICS_COMMITTEE', 'REGULATOR'] },
   { label: 'Studies', path: '/studies', icon: BookOpen, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR', 'PHARMACOVIGILANCE_OFFICER', 'ETHICS_COMMITTEE', 'REGULATOR'] },
-  { label: 'Sites', path: '/sites', icon: Building2, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'MONITOR'] },
-  { label: 'Participants', path: '/participants', icon: Users, roles: ['ADMIN', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR'] },
-  { label: 'Visits & Data Quality', path: '/visits', icon: ClipboardList, roles: ['ADMIN', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR'] },
-  { label: 'Safety & PV', path: '/safety', icon: Shield, roles: ['ADMIN', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'PHARMACOVIGILANCE_OFFICER'] },
-  { label: 'Ethics & Regulatory', path: '/ethics', icon: FileCheck, roles: ['ADMIN', 'PRINCIPAL_INVESTIGATOR', 'ETHICS_COMMITTEE', 'LEADERSHIP', 'REGULATOR'] },
-  { label: 'Monitoring', path: '/monitoring', icon: Eye, roles: ['ADMIN', 'MONITOR', 'PRINCIPAL_INVESTIGATOR'] },
-  { label: 'Data Standards & Exports', path: '/exports', icon: Database, roles: ['ADMIN', 'LEADERSHIP', 'REGULATOR'] },
-  { label: 'Audit & Administration', path: '/audit', icon: Settings, roles: ['ADMIN', 'LEADERSHIP', 'REGULATOR'] },
+  { label: 'Sites', path: '/sites', icon: Building2, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR', 'REGULATOR'] },
+  { label: 'Participants', path: '/participants', icon: Users, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR', 'REGULATOR'] },
+  { label: 'Visits & eCRF', path: '/visits', icon: ClipboardList, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR'] },
+  { label: 'AI Note Structuring', path: '/ai-structuring', icon: Sparkles, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR', 'PHARMACOVIGILANCE_OFFICER', 'ETHICS_COMMITTEE', 'REGULATOR'] },
+  { label: 'Safety & PV', path: '/safety', icon: Shield, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'PHARMACOVIGILANCE_OFFICER', 'REGULATOR'] },
+  { label: 'Ethics & Regulatory', path: '/ethics', icon: FileCheck, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'ETHICS_COMMITTEE', 'REGULATOR'] },
+  { label: 'Site Monitoring', path: '/monitoring', icon: Eye, roles: ['ADMIN', 'LEADERSHIP', 'MONITOR', 'PRINCIPAL_INVESTIGATOR'] },
+  { label: 'Data Standards & Exports', path: '/exports', icon: Database, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'REGULATOR'] },
+  { label: 'Audit Trail & Ledger', path: '/audit', icon: Settings, roles: ['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'REGULATOR', 'ETHICS_COMMITTEE'] },
 ];
 
 interface AppShellProps {

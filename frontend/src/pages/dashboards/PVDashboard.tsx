@@ -168,13 +168,13 @@ export default function PVDashboard() {
                   <tr key={i} className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${isUrgent ? 'bg-maroon-50/50' : ''}`}>
                     <td className="py-3 px-3 font-mono text-xs font-bold text-navy-700">{c.case_id as string}</td>
                     <td className="py-3 px-3">
-                      <span className="badge-info text-xs">{(c.event_category as string).replace(/_/g, ' ')}</span>
+                      <span className="badge-info text-xs">{String(c.event_category || 'AE').replace(/_/g, ' ')}</span>
                     </td>
                     <td className="py-3 px-3 text-sm text-slate-700 max-w-48 truncate">{c.event_term as string}</td>
                     <td className="py-3 px-3">
                       {c.seriousness
                         ? <span className={(c.seriousness as string) !== 'NOT_SERIOUS' ? 'badge-high' : 'badge-low'}>
-                            {(c.seriousness as string).replace(/_/g, ' ')}
+                            {String(c.seriousness).replace(/_/g, ' ')}
                           </span>
                         : <span className="text-xs text-slate-400">Pending assessment</span>}
                     </td>
@@ -243,7 +243,7 @@ export default function PVDashboard() {
             <div className="grid grid-cols-2 gap-3">
               {[
                 { label: 'Case ID', value: caseModal.case_id as string },
-                { label: 'Category', value: (caseModal.event_category as string).replace(/_/g, ' ') },
+                { label: 'Category', value: String(caseModal.event_category || 'AE').replace(/_/g, ' ') },
                 { label: 'Event Term', value: caseModal.event_term as string },
                 { label: 'Seriousness', value: caseModal.seriousness ? (caseModal.seriousness as string).replace(/_/g, ' ') : 'Pending assessment' },
                 { label: 'Current Status', value: (STATUS_CONFIG[caseModal.status as string] ?? STATUS_CONFIG.DRAFT).label },

@@ -7,6 +7,7 @@ from app.database.session import init_db
 from app.api.auth import router as auth_router
 from app.api.dashboards import router as dashboards_router
 from app.api.studies import router as studies_router
+from app.api.assist import router as assist_router
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -50,6 +51,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
 app.include_router(dashboards_router, prefix=settings.API_V1_PREFIX)
 app.include_router(studies_router, prefix=settings.API_V1_PREFIX)
+app.include_router(assist_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/health")

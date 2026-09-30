@@ -126,7 +126,7 @@ export default function EthicsDashboard() {
                     <td className="py-3 px-3 font-mono text-xs text-slate-600">{r.protocol_id as string ?? 'AIIA-OA-2026-001'}</td>
                     <td className="py-3 px-3 font-medium text-navy-800">{r.study_title as string ?? 'AyurVeda OA-2026'}</td>
                     <td className="py-3 px-3">
-                      <span className="badge-info">{(r.submission_type as string).replace(/_/g, ' ')}</span>
+                      <span className="badge-info">{String(r.submission_type || 'AMENDMENT').replace(/_/g, ' ')}</span>
                     </td>
                     <td className="py-3 px-3 text-xs text-slate-600">{r.protocol_version as string ?? 'v2.0'}</td>
                     <td className="py-3 px-3 text-xs text-slate-600">{formatDate(r.submission_date as string)}</td>
@@ -191,7 +191,7 @@ export default function EthicsDashboard() {
             <div className="bg-slate-50 rounded-xl p-3 text-sm">
               <div className="font-semibold text-navy-800">{selectedItem.study_title as string}</div>
               <div className="text-xs text-slate-500 font-mono mt-0.5">{selectedItem.protocol_id as string}</div>
-              <div className="text-xs text-slate-600 mt-1">Type: {(selectedItem.submission_type as string).replace(/_/g, ' ')} | Version: {selectedItem.protocol_version as string}</div>
+              <div className="text-xs text-slate-600 mt-1">Type: {String(selectedItem.submission_type || 'AMENDMENT').replace(/_/g, ' ')} | Version: {selectedItem.protocol_version as string}</div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Committee Comments (required for record)</label>
@@ -227,7 +227,7 @@ export default function EthicsDashboard() {
           <div className="space-y-4">
             <div className="bg-slate-50 rounded-xl p-3 text-sm">
               <div className="font-semibold text-navy-800">{selectedItem.study_title as string}</div>
-              <div className="text-xs text-slate-600 mt-0.5">Submission: {(selectedItem.submission_type as string).replace(/_/g, ' ')}</div>
+              <div className="text-xs text-slate-600 mt-0.5">Submission: {String(selectedItem.submission_type || 'AMENDMENT').replace(/_/g, ' ')}</div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Clarification Required</label>
@@ -267,7 +267,7 @@ export default function EthicsDashboard() {
             </div>
             <div className="bg-slate-50 rounded-xl p-3 text-sm">
               <div className="font-semibold text-navy-800">{selectedItem.study_title as string}</div>
-              <div className="text-xs text-slate-600 mt-0.5">Submission: {(selectedItem.submission_type as string).replace(/_/g, ' ')}</div>
+              <div className="text-xs text-slate-600 mt-0.5">Submission: {String(selectedItem.submission_type || 'AMENDMENT').replace(/_/g, ' ')}</div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Reason for Hold</label>

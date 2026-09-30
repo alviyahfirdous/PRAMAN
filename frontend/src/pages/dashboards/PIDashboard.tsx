@@ -104,7 +104,7 @@ export default function PIDashboard() {
                   <td className="py-2.5 px-3 font-mono text-xs text-slate-600">{s.protocol_id as string}</td>
                   <td className="py-2.5 px-3 font-medium text-navy-800">{s.title as string}</td>
                   <td className="py-2.5 px-3">
-                    <span className="badge-info">{(s.status as string).replace(/_/g, ' ')}</span>
+                    <span className="badge-info">{s.status ? (s.status as string).replace(/_/g, ' ') : 'ACTIVE'}</span>
                   </td>
                   <td className="py-2.5 px-3">
                     <span className={getRiskBadgeClass(s.risk_level as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL')}>
@@ -144,7 +144,7 @@ export default function PIDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${isSigned ? 'bg-teal-100 text-teal-700' : (item.requires_signature as boolean) ? 'bg-maroon-100 text-maroon-700' : 'bg-clinical-100 text-clinical-700'}`}>
-                        {isSigned ? '✓ Signed' : (item.type as string).replace(/_/g, ' ')}
+                        {isSigned ? '✓ Signed' : item.type ? (item.type as string).replace(/_/g, ' ') : 'APPROVAL'}
                       </span>
                       {Boolean(item.case_id) && <span className="font-mono text-xs text-slate-600">{item.case_id as string}</span>}
                       {item.hours_remaining !== null && item.hours_remaining !== undefined && !isSigned && (
@@ -214,8 +214,8 @@ export default function PIDashboard() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Type', value: (reviewModal.type as string).replace(/_/g, ' ') },
-                { label: 'Case ID', value: reviewModal.case_id as string || '—' },
+                { label: 'Type', value: reviewModal.type ? (reviewModal.type as string).replace(/_/g, ' ') : '—' },
+                { label: 'Case ID', value: (reviewModal.case_id as string) || '—' },
                 { label: 'Status', value: reviewModal.status as string },
                 { label: 'Created', value: formatDate(reviewModal.created_at as string) },
                 { label: 'Requires E-Signature', value: reviewModal.requires_signature ? 'Yes' : 'No' },
@@ -263,7 +263,7 @@ export default function PIDashboard() {
         <div className="space-y-4">
           <div className="bg-navy-50 border border-navy-200 rounded-lg px-4 py-3 text-sm text-navy-800">
             You are signing: <strong>{esignModal ? (esignModal.type as string).replace(/_/g, ' ') : ''}</strong>
-            {Boolean(esignModal?.case_id) && <> — <span className="font-mono">{esignModal.case_id as string}</span></>}
+            {Boolean(esignModal?.case_id) && <> — <span className="font-mono">{esignModal?.case_id as string}</span></>}
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Enter your PIN to confirm (any 4+ digits for demo)</label>

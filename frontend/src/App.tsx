@@ -10,7 +10,18 @@ import PIDashboard from '@/pages/dashboards/PIDashboard';
 import CoordinatorDashboard from '@/pages/dashboards/CoordinatorDashboard';
 import EthicsDashboard from '@/pages/dashboards/EthicsDashboard';
 import PVDashboard from '@/pages/dashboards/PVDashboard';
+import MonitorDashboard from '@/pages/dashboards/MonitorDashboard';
 import StudiesListPage from '@/pages/studies/StudiesListPage';
+import StudyDetailPage from '@/pages/studies/StudyDetailPage';
+import SitesPage from '@/pages/sites/SitesPage';
+import ParticipantsPage from '@/pages/participants/ParticipantsPage';
+import VisitsPage from '@/pages/visits/VisitsPage';
+import SafetyPage from '@/pages/safety/SafetyPage';
+import EthicsPage from '@/pages/ethics/EthicsPage';
+import MonitoringPage from '@/pages/monitoring/MonitoringPage';
+import ExportsPage from '@/pages/exports/ExportsPage';
+import AuditPage from '@/pages/audit/AuditPage';
+import AINoteStructuringPage from '@/pages/ai/AINoteStructuringPage';
 import type { UserRole } from '@/types';
 
 const queryClient = new QueryClient({
@@ -83,34 +94,68 @@ export default function App() {
           } />
           <Route path="/dashboard/monitor" element={
             <ProtectedRoute allowedRoles={['MONITOR', 'ADMIN']}>
-              <div className="p-6 text-center text-slate-500">Monitor dashboard — Phase 2</div>
+              <MonitorDashboard />
             </ProtectedRoute>
           } />
 
           {/* Studies */}
           <Route path="/studies" element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR', 'PHARMACOVIGILANCE_OFFICER', 'ETHICS_COMMITTEE', 'REGULATOR']}>
               <StudiesListPage />
             </ProtectedRoute>
           } />
           <Route path="/studies/:studyId" element={
-            <ProtectedRoute>
-              <div className="p-6 text-center text-slate-500">Study detail — Phase 2</div>
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR', 'PHARMACOVIGILANCE_OFFICER', 'ETHICS_COMMITTEE', 'REGULATOR']}>
+              <StudyDetailPage />
             </ProtectedRoute>
           } />
 
-          {/* Placeholder routes for Phase 2+ */}
-          {['/sites', '/participants', '/visits', '/safety', '/ethics', '/monitoring', '/exports', '/audit'].map((path) => (
-            <Route key={path} path={path} element={
-              <ProtectedRoute>
-                <div className="clinical-card p-8 text-center">
-                  <div className="text-4xl mb-3">🚧</div>
-                  <h2 className="text-lg font-semibold text-navy-800 mb-2">{path.slice(1).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</h2>
-                  <p className="text-slate-500 text-sm">This module is in the development queue. Phase 2 and beyond.</p>
-                </div>
-              </ProtectedRoute>
-            } />
-          ))}
+          {/* Clinical Management Modules */}
+          <Route path="/sites" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR', 'REGULATOR']}>
+              <SitesPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/participants" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR', 'REGULATOR']}>
+              <ParticipantsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/visits" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR']}>
+              <VisitsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/ai-structuring" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'MONITOR', 'PHARMACOVIGILANCE_OFFICER']}>
+              <AINoteStructuringPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/safety" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'STUDY_COORDINATOR', 'PHARMACOVIGILANCE_OFFICER', 'REGULATOR']}>
+              <SafetyPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/ethics" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'ETHICS_COMMITTEE', 'REGULATOR']}>
+              <EthicsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/monitoring" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'MONITOR', 'PRINCIPAL_INVESTIGATOR']}>
+              <MonitoringPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/exports" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'REGULATOR']}>
+              <ExportsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/audit" element={
+            <ProtectedRoute allowedRoles={['ADMIN', 'LEADERSHIP', 'PRINCIPAL_INVESTIGATOR', 'REGULATOR', 'ETHICS_COMMITTEE']}>
+              <AuditPage />
+            </ProtectedRoute>
+          } />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

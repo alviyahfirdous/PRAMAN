@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ModalProps {
-  open: boolean;
+  open?: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
@@ -11,7 +11,7 @@ interface ModalProps {
   footer?: React.ReactNode;
 }
 
-export default function Modal({ open, onClose, title, children, size = 'md', footer }: ModalProps) {
+export default function Modal({ open = true, onClose, title, children, size = 'md', footer }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };

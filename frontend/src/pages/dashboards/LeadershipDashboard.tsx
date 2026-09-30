@@ -63,7 +63,7 @@ function KPICard({
 }
 
 function RiskBadge({ level }: { level: RiskLevel }) {
-  return <span className={getRiskBadgeClass(level)}>{level.replace('_', ' ')}</span>;
+  return <span className={getRiskBadgeClass(level)}>{String(level || 'LOW').replace('_', ' ')}</span>;
 }
 
 function StudyHealthCard({ card, onClick }: {
@@ -176,7 +176,7 @@ function CriticalActionItem({ action, onAction }: {
             "text-xs font-medium px-2 py-0.5 rounded-full",
             isCritical ? "bg-maroon-100 text-maroon-700" : "bg-terracotta-100 text-terracotta-700"
           )}>
-            {action.type.replace(/_/g, ' ')}
+            {String(action.type || 'ACTION').replace(/_/g, ' ')}
           </span>
         </div>
         <div className="flex items-center gap-2 mt-1 text-xs text-slate-600">
